@@ -58,6 +58,12 @@ final class PermissionSeeder extends Seeder
             ['name' => 'Approve Loan', 'slug' => 'group.approve_loan', 'module' => 'group'],
             ['name' => 'Manage Members', 'slug' => 'group.manage_members', 'module' => 'group'],
             ['name' => 'Manage Meetings', 'slug' => 'group.manage_meetings', 'module' => 'group'],
+
+            // Group governance (mobile)
+            ['name' => 'Manage Elections', 'slug' => 'group.manage_elections', 'module' => 'governance'],
+            ['name' => 'Call Elections', 'slug' => 'group.call_elections', 'module' => 'governance'],
+            ['name' => 'Assign Leadership', 'slug' => 'group.assign_leadership', 'module' => 'governance'],
+            ['name' => 'Participate in Governance', 'slug' => 'member.participate_governance', 'module' => 'governance'],
         ];
 
         foreach ($permissions as $perm) {
@@ -85,21 +91,34 @@ final class PermissionSeeder extends Seeder
                 'group.approve_treasury', 'group.verify_repayments', 'group.generate_reports',
                 'group.record_contribution', 'group.record_shares', 'group.disburse_loan',
                 'group.share_out_verify', 'group.manage_mobile_money', 'group.manage_meetings',
-                'sync.data',
+                'member.participate_governance', 'sync.data',
             ],
-            'member' => [
-                'view_dashboard', 'member.view_own_balance', 'member.view_own_history',
-                'member.apply_loan', 'member.repay_loan', 'member.vote', 'member.view_meetings',
-                'member.view_notifications', 'member.buy_shares', 'sync.data',
+            'provisional_chair' => [
+                'view_dashboard', 'group.manage_members',
+                'group.assign_leadership', 'group.call_elections', 'group.manage_elections',
+                'member.participate_governance', 'sync.data',
             ],
             'chairperson' => [
                 'view_dashboard', 'group.manage_members', 'group.approve_loan',
                 'group.manage_meetings', 'group.share_out_verify', 'group.generate_reports',
-                'member.vote', 'sync.data',
+                'group.manage_elections', 'group.call_elections', 'group.assign_leadership',
+                'member.vote', 'member.participate_governance', 'sync.data',
             ],
             'secretary' => [
                 'view_dashboard', 'group.manage_members', 'group.manage_meetings',
-                'group.generate_reports', 'sync.data',
+                'group.generate_reports', 'member.participate_governance', 'sync.data',
+            ],
+            'money_counter' => [
+                'view_dashboard', 'group.view_finances', 'member.participate_governance', 'sync.data',
+            ],
+            'key_holder' => [
+                'view_dashboard', 'member.participate_governance', 'sync.data',
+            ],
+            'member' => [
+                'view_dashboard', 'member.view_own_balance', 'member.view_own_history',
+                'member.apply_loan', 'member.repay_loan', 'member.vote', 'member.view_meetings',
+                'member.view_notifications', 'member.buy_shares', 'member.participate_governance',
+                'sync.data',
             ],
         ];
 

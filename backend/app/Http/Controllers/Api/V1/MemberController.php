@@ -8,17 +8,31 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\VicobaGroup;
 use App\Services\FinancialScoringService;
+use App\Services\MemberEnrollmentService;
+use App\Services\RbacService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class MemberController extends Controller
 {
-    public function __construct(private readonly FinancialScoringService $scoring) {}
+    public function __construct(
+        private readonly FinancialScoringService $scoring,
+        private readonly MemberEnrollmentService $enrollment,
+        private readonly RbacService $rbac,
+    ) {}
 
-    public function index(VicobaGroup $group): JsonResponse
+    public function index(Request $request, VicobaGroup $group): JsonResponse
     {
+        $user = $request->user();
+        $query = $group->members()->with('user')->orderBy('member_number');
+
+        if (! $this->rbac->hasPermission($user, 'group.manage_members', $group->id)) {
+            $query->where('user_id', $user->id);
+        }
+
         return response()->json([
-            'members' => $group->members()->with('user')->paginate(30),
+            'members' => $query->paginate(30),
+            'can_manage_members' => $this->rbac->hasPermission($user, 'group.manage_members', $group->id),
         ]);
     }
 
@@ -33,16 +47,20 @@ final class MemberController extends Controller
             'join_date' => 'nullable|date',
         ]);
 
-        $number = (string) ($group->members()->count() + 1);
+        $result = $this->enrollment->createGroupMember($group, $data);
 
-        $member = $group->members()->create([
-            ...$data,
-            'member_number' => str_pad($number, 3, '0', STR_PAD_LEFT),
-            'join_date' => $data['join_date'] ?? now()->toDateString(),
-            'status' => 'active',
-        ]);
+        $temporaryPin = $result['temporary_pin'] ?? null;
 
-        return response()->json(['member' => $member], 201);
+        return response()->json([
+            'member' => $result['member'],
+            'linked_existing_user' => $result['linked_existing_user'],
+            'requires_app_registration' => false,
+            'requires_temporary_pin_login' => $temporaryPin !== null,
+            'temporary_pin' => $temporaryPin,
+            'activation_hint' => $temporaryPin !== null
+                ? 'Share the temporary PIN with the member. They must log in and choose a new PIN.'
+                : 'Member can log in with their existing phone number and PIN.',
+        ], 201);
     }
 
     public function show(Member $member): JsonResponse

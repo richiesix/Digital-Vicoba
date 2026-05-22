@@ -133,9 +133,18 @@ docker compose up -d
 - `POST /api/v1/mobile-money/*` — M-Pesa, Airtel, Mixx, HaloPesa
 - `POST /api/v1/ussd/callback` — USSD (Africa's Talking)
 
+## Platform split
+
+- **Mobile app** — day-to-day VICOBA group operations: members, governance, meetings, savings, loans, share-out.
+- **Web admin (`/admin`)** — platform operators only (Super Admin / Regional Admin): analytics, users, fraud, system settings. No group-level treasurer/secretary workflows.
+
+## Interim chairperson (group founder)
+
+When the first member creates a group, they receive the `provisional_chair` role until `governance_complete` is true. During this period they may register members and run governance setup (elections / leadership assignment). Full chairperson/treasurer/secretary RBAC applies after chairperson, secretary, and treasurer are assigned via `leadership_roles`.
+
 ## User Roles
 
-Super Admin, Regional Admin, Chairperson, Secretary, Treasurer, Money Counter, Key Holder, Member, Trainer/Field Officer — each with RBAC permissions.
+Super Admin, Regional Admin, Provisional Chair, Chairperson, Secretary, Treasurer, Money Counter, Key Holder, Member, Trainer/Field Officer — each with RBAC permissions.
 
 ## Offline-First (Mobile)
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Election;
+use App\Models\LeadershipAssignment;
 use App\Models\Loan;
 use App\Models\Meeting;
 use App\Models\VicobaGroup;
@@ -46,6 +48,16 @@ final class EnsureGroupAccess
         $meeting = $request->route('meeting');
         if ($meeting instanceof Meeting) {
             return $meeting->group_id;
+        }
+
+        $election = $request->route('election');
+        if ($election instanceof Election) {
+            return $election->group_id;
+        }
+
+        $assignment = $request->route('assignment');
+        if ($assignment instanceof LeadershipAssignment) {
+            return $assignment->group_id;
         }
 
         return null;

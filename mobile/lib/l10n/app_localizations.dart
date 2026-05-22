@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @verifyOtp.
   ///
   /// In sw, this message translates to:
-  /// **'Thibitisha OTP'**
+  /// **'Thibitisha nambari'**
   String get verifyOtp;
 
   /// No description provided for @otpSentTo.
@@ -620,6 +620,36 @@ abstract class AppLocalizations {
   /// **'Mwenyekiti'**
   String get roleChairperson;
 
+  /// No description provided for @roleProvisionalChair.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mwenyekiti wa Muda'**
+  String get roleProvisionalChair;
+
+  /// No description provided for @interimChairBanner.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wewe ni mwenyekiti wa muda hadi uongozi ukamilike. Unaweza kusajili wanachama na kuweka uongozi pekee. Shughuli nyingine za kikundi zitafunguliwa baada ya kuweka mwenyekiti, katibu na mhasibu.'**
+  String get interimChairBanner;
+
+  /// No description provided for @setupGovernanceTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Anza hapa'**
+  String get setupGovernanceTitle;
+
+  /// No description provided for @setupGovernance.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka uongozi'**
+  String get setupGovernance;
+
+  /// No description provided for @governanceLockedMessage.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kamilisha uongozi kwanza. Sajili wanachama na weka mwenyekiti, katibu na mhasibu.'**
+  String get governanceLockedMessage;
+
   /// No description provided for @roleSecretary.
   ///
   /// In sw, this message translates to:
@@ -631,6 +661,252 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Mwanachama'**
   String get roleMember;
+
+  /// No description provided for @roleMoneyCounter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mhesabu Fedha'**
+  String get roleMoneyCounter;
+
+  /// No description provided for @roleKeyHolder.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mwenye Funguo'**
+  String get roleKeyHolder;
+
+  /// No description provided for @governance.
+  ///
+  /// In sw, this message translates to:
+  /// **'Utawala'**
+  String get governance;
+
+  /// No description provided for @currentLeadership.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uongozi wa Sasa'**
+  String get currentLeadership;
+
+  /// No description provided for @elections.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchaguzi'**
+  String get elections;
+
+  /// No description provided for @createElection.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unda Uchaguzi'**
+  String get createElection;
+
+  /// No description provided for @assignLeadership.
+  ///
+  /// In sw, this message translates to:
+  /// **'Teua Uongozi'**
+  String get assignLeadership;
+
+  /// No description provided for @registerMember.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sajili mwanachama'**
+  String get registerMember;
+
+  /// No description provided for @governanceSetupTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kuandaa kikundi'**
+  String get governanceSetupTitle;
+
+  /// No description provided for @governanceStep1.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sajili wanachama wengine (angalau mmoja zaidi)'**
+  String get governanceStep1;
+
+  /// No description provided for @governanceStep2.
+  ///
+  /// In sw, this message translates to:
+  /// **'Teua mwenyekiti, katibu, mhasibu na mhesabaji wa fedha'**
+  String get governanceStep2;
+
+  /// No description provided for @memberCountLabel.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wanachama wa kikundi'**
+  String get memberCountLabel;
+
+  /// No description provided for @memberCountValue.
+  ///
+  /// In sw, this message translates to:
+  /// **'{count} hai'**
+  String memberCountValue(int count);
+
+  /// No description provided for @membersNeededForLeadership.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ongeza angalau mwanachama mmoja kabla ya kuteua uongozi'**
+  String get membersNeededForLeadership;
+
+  /// No description provided for @governancePermissionHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unahitaji ruhusa ya kusimamia wanachama na kuteua uongozi. Ukiwa ndiye uliyeunda kikundi, toka kisha ingia tena ili kusasisha nafasi yako.'**
+  String get governancePermissionHint;
+
+  /// No description provided for @governanceReloginHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sasisha kikao'**
+  String get governanceReloginHint;
+
+  /// No description provided for @assignLeadershipSetupHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wakati wa kuandaa, nafasi zinateuliwa mara moja. Teua mwenyekiti, katibu na mhasibu ili kufungua huduma kamili za kikundi.'**
+  String get assignLeadershipSetupHint;
+
+  /// No description provided for @selectMember.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua mwanachama'**
+  String get selectMember;
+
+  /// No description provided for @assignRole.
+  ///
+  /// In sw, this message translates to:
+  /// **'Teua nafasi'**
+  String get assignRole;
+
+  /// No description provided for @leadershipAssigned.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nafasi ya uongozi imeteuliwa'**
+  String get leadershipAssigned;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In sw, this message translates to:
+  /// **'Angalia zote'**
+  String get viewAll;
+
+  /// No description provided for @noLeadershipYet.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna uongozi uliochaguliwa. Fanya uchaguzi kuteua viongozi.'**
+  String get noLeadershipYet;
+
+  /// No description provided for @noOpenElections.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna uchaguzi ulio wazi'**
+  String get noOpenElections;
+
+  /// No description provided for @noCandidatesYet.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna wagombea bado'**
+  String get noCandidatesYet;
+
+  /// No description provided for @candidates.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wagombea'**
+  String get candidates;
+
+  /// No description provided for @electionResults.
+  ///
+  /// In sw, this message translates to:
+  /// **'Matokeo ya Uchaguzi'**
+  String get electionResults;
+
+  /// No description provided for @openElection.
+  ///
+  /// In sw, this message translates to:
+  /// **'Fungua Kupiga Kura'**
+  String get openElection;
+
+  /// No description provided for @closeElection.
+  ///
+  /// In sw, this message translates to:
+  /// **'Funga na Hesabu'**
+  String get closeElection;
+
+  /// No description provided for @votingScreen.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kupiga Kura'**
+  String get votingScreen;
+
+  /// No description provided for @voteRecorded.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kura yako imehifadhiwa'**
+  String get voteRecorded;
+
+  /// No description provided for @electionCreated.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchaguzi umeundwa'**
+  String get electionCreated;
+
+  /// No description provided for @electionTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jina la uchaguzi'**
+  String get electionTitle;
+
+  /// No description provided for @description.
+  ///
+  /// In sw, this message translates to:
+  /// **'Maelezo'**
+  String get description;
+
+  /// No description provided for @quorumPercent.
+  ///
+  /// In sw, this message translates to:
+  /// **'Quorum'**
+  String get quorumPercent;
+
+  /// No description provided for @manualAssignmentHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Pendekeza nafasi ya uongozi. Wanachama lazima waidhinishe kufikia quorum.'**
+  String get manualAssignmentHint;
+
+  /// No description provided for @role.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nafasi'**
+  String get role;
+
+  /// No description provided for @memberId.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nambari ya Mwanachama'**
+  String get memberId;
+
+  /// No description provided for @reason.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sababu'**
+  String get reason;
+
+  /// No description provided for @submitForApproval.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wasilisha kwa idhini ya wanachama'**
+  String get submitForApproval;
+
+  /// No description provided for @assignmentProposed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Pendekezo limewasilishwa — linasubiri kura za wanachama'**
+  String get assignmentProposed;
+
+  /// No description provided for @platformAdminWebOnly.
+  ///
+  /// In sw, this message translates to:
+  /// **'Usimamizi wa jukwaa unapatikana tu kwenye Web Admin Panel. Tumia akaunti ya mwanachama wa VICOBA katika programu hii.'**
+  String get platformAdminWebOnly;
 
   /// No description provided for @dashboardAdmin.
   ///
@@ -913,12 +1189,6 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Shughuli za Hivi Karibuni'**
   String get recentActivity;
-
-  /// No description provided for @selectMember.
-  ///
-  /// In sw, this message translates to:
-  /// **'Chagua mwanachama'**
-  String get selectMember;
 
   /// No description provided for @shareQuantity.
   ///
@@ -1352,6 +1622,108 @@ abstract class AppLocalizations {
   /// **'Mwanachama ameongezwa'**
   String get memberAdded;
 
+  /// No description provided for @memberActivationRegister.
+  ///
+  /// In sw, this message translates to:
+  /// **'Waombe wafungue programu → Jisajili → namba hii hiyo → OTP → PIN tarakimu 4. Kisha waingie.'**
+  String get memberActivationRegister;
+
+  /// No description provided for @memberActivationLogin.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tayari ana akaunti. Anaweza kuingia kwa namba hii na PIN yake.'**
+  String get memberActivationLogin;
+
+  /// No description provided for @temporaryPinTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN ya muda imetengenezwa'**
+  String get temporaryPinTitle;
+
+  /// No description provided for @temporaryPinMessage.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mpe {name} PIN hii. Aingie kwa namba ya simu na PIN hii, kisha achague PIN mpya.'**
+  String temporaryPinMessage(String name);
+
+  /// No description provided for @temporaryPinValue.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN ya muda: {pin}'**
+  String temporaryPinValue(String pin);
+
+  /// No description provided for @temporaryPinDevHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Katika maendeleo, PIN ya muda kawaida ni tarakimu 4 za mwisho za namba ya simu.'**
+  String get temporaryPinDevHint;
+
+  /// No description provided for @changePinRequiredTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unda PIN yako mpya'**
+  String get changePinRequiredTitle;
+
+  /// No description provided for @changePinRequiredSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Umeingia kwa PIN ya muda. Chagua PIN mpya ya tarakimu 4 ili kuendelea — huwezi kuruka hatua hii.'**
+  String get changePinRequiredSubtitle;
+
+  /// No description provided for @pinCannotMatchTemporary.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN mpya lazima iwe tofauti na PIN ya muda.'**
+  String get pinCannotMatchTemporary;
+
+  /// No description provided for @changeProfilePhoto.
+  ///
+  /// In sw, this message translates to:
+  /// **'Badilisha picha ya wasifu'**
+  String get changeProfilePhoto;
+
+  /// No description provided for @uploadFromGallery.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua kutoka ghala'**
+  String get uploadFromGallery;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In sw, this message translates to:
+  /// **'Piga picha'**
+  String get takePhoto;
+
+  /// No description provided for @removeProfilePhoto.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ondoa picha'**
+  String get removeProfilePhoto;
+
+  /// No description provided for @profilePhotoUpdated.
+  ///
+  /// In sw, this message translates to:
+  /// **'Picha ya wasifu imesasishwa'**
+  String get profilePhotoUpdated;
+
+  /// No description provided for @profilePhotoRemoved.
+  ///
+  /// In sw, this message translates to:
+  /// **'Picha ya wasifu imeondolewa'**
+  String get profilePhotoRemoved;
+
+  /// No description provided for @profilePhotoUploadFailed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kupakia picha ya wasifu'**
+  String get profilePhotoUploadFailed;
+
+  /// No description provided for @cameraNotAvailableOnWeb.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kamera haipatikani kwenye kivinjari. Chagua kutoka ghala.'**
+  String get cameraNotAvailableOnWeb;
+
   /// No description provided for @filterAll.
   ///
   /// In sw, this message translates to:
@@ -1706,17 +2078,191 @@ abstract class AppLocalizations {
   /// **'Ingia kwa nambari ya simu na PIN'**
   String get loginSubtitle;
 
-  /// No description provided for @tryDemoAccount.
+  /// No description provided for @welcomeTitle.
   ///
   /// In sw, this message translates to:
-  /// **'Jaribu akaunti ya demo'**
-  String get tryDemoAccount;
+  /// **'Karibu Digital Vikoba'**
+  String get welcomeTitle;
 
-  /// No description provided for @demoPinLabel.
+  /// No description provided for @welcomeSubtitle.
   ///
   /// In sw, this message translates to:
-  /// **'PIN ya demo: 1234'**
-  String get demoPinLabel;
+  /// **'Jisajili kikundi chako, okoa pamoja, na simamia mikopo kwa uwazi.'**
+  String get welcomeSubtitle;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In sw, this message translates to:
+  /// **'Anza sasa'**
+  String get getStarted;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tayari nina akaunti'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @alreadyHaveAccountLogin.
+  ///
+  /// In sw, this message translates to:
+  /// **'Umesajiliwa? Ingia'**
+  String get alreadyHaveAccountLogin;
+
+  /// No description provided for @backToWelcome.
+  ///
+  /// In sw, this message translates to:
+  /// **'Rudi'**
+  String get backToWelcome;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unda akaunti yako kwa nambari ya simu. Tutakutumia nambari ya uthibitisho.'**
+  String get registerSubtitle;
+
+  /// No description provided for @registerChooseLanguageTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua lugha yako'**
+  String get registerChooseLanguageTitle;
+
+  /// No description provided for @registerChooseLanguageSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua lugha unayopendelea kabla ya kujisajili. Unaweza kubadilisha baadaye.'**
+  String get registerChooseLanguageSubtitle;
+
+  /// No description provided for @registerContinue.
+  ///
+  /// In sw, this message translates to:
+  /// **'Endelea na usajili'**
+  String get registerContinue;
+
+  /// No description provided for @changeLanguage.
+  ///
+  /// In sw, this message translates to:
+  /// **'Badilisha lugha'**
+  String get changeLanguage;
+
+  /// No description provided for @invalidPhone.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka nambari sahihi ya Tanzania (mf. 0712345678)'**
+  String get invalidPhone;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN hazifanani'**
+  String get pinMismatch;
+
+  /// No description provided for @pinMatches.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN zinafanana'**
+  String get pinMatches;
+
+  /// No description provided for @otpMustBe6.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka nambari 6 za uthibitisho'**
+  String get otpMustBe6;
+
+  /// No description provided for @invalidOtp.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nambari si sahihi au imekwisha'**
+  String get invalidOtp;
+
+  /// No description provided for @otpSendFailed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kutuma nambari ya uthibitisho'**
+  String get otpSendFailed;
+
+  /// No description provided for @otpResent.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nambari imetumwa tena'**
+  String get otpResent;
+
+  /// No description provided for @resendOtp.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma tena'**
+  String get resendOtp;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma tena baada ya {seconds}s'**
+  String resendIn(int seconds);
+
+  /// No description provided for @otpEnterSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka nambari 6 za uthibitisho zilizotumwa kwenye simu yako'**
+  String get otpEnterSubtitle;
+
+  /// No description provided for @registrationExpired.
+  ///
+  /// In sw, this message translates to:
+  /// **'Muda wa usajili umeisha. Anza upya.'**
+  String get registrationExpired;
+
+  /// No description provided for @pinSetupSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua PIN ya tarakimu 4. Utaitumia kuingia kwa usalama.'**
+  String get pinSetupSubtitle;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sanidi kikundi chako'**
+  String get onboardingTitle;
+
+  /// No description provided for @onboardingSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hujajiunga na kikundi cha VICOBA. Unda kikundi kama mwanachama wa kwanza, au jiunge kwa mwaliko.'**
+  String get onboardingSubtitle;
+
+  /// No description provided for @createYourGroup.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unda kikundi chako cha VICOBA'**
+  String get createYourGroup;
+
+  /// No description provided for @createGroupHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kama mwanachama wa kwanza, unaweza kuanzisha kikundi na kuwaalika wengine.'**
+  String get createGroupHint;
+
+  /// No description provided for @joinWithInvite.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nina mwaliko'**
+  String get joinWithInvite;
+
+  /// No description provided for @inviteComingSoon.
+  ///
+  /// In sw, this message translates to:
+  /// **'Viungo vya mwaliko vitapatikana hivi karibuni. Muulize katibu wa kikundi akuongeze kwa nambari ya simu.'**
+  String get inviteComingSoon;
+
+  /// No description provided for @connectionError.
+  ///
+  /// In sw, this message translates to:
+  /// **'Haiwezi kuunganisha na seva. Hakikisha backend inaendesha.'**
+  String get connectionError;
+
+  /// No description provided for @devOtpHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Maendeleo: nambari ya uthibitisho ni 123456'**
+  String get devOtpHint;
 
   /// No description provided for @notificationsSubtitle.
   ///

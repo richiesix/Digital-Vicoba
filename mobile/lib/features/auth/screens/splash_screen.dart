@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/auth_session.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/router/app_router.dart';
@@ -25,10 +27,40 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
-    final hasToken = await ref.read(apiClientProvider).hasToken();
+    final api = ref.read(apiClientProvider);
+    final hasToken = await api.hasToken();
 
-    if (mounted) {
-      context.go(hasToken ? AppRoutes.home : AppRoutes.login);
+    if (!hasToken) {
+      if (mounted) context.go(AppRoutes.welcome);
+      return;
+    }
+
+    try {
+      final res = await api.get('/auth/me');
+      final session = AuthSession.fromProfile(res.data as Map<String, dynamic>);
+      await ref.read(authSessionProvider.notifier).setSession(session);
+
+      if (!mounted) return;
+      if (session.isPlatformRedirect) {
+        await api.clearTokens();
+        await ref.read(authSessionProvider.notifier).clear();
+        if (mounted) context.go(AppRoutes.welcome);
+        return;
+      }
+
+      if (session.mustChangePin) {
+        context.go('${AppRoutes.pinSetup}?forced=1');
+      } else if (session.groupId == null) {
+        context.go(AppRoutes.onboarding);
+      } else if (session.needsGovernanceSetup) {
+        context.go(AppRoutes.governance);
+      } else {
+        context.go(AppRoutes.home);
+      }
+    } on DioException catch (_) {
+      await api.clearTokens();
+      await ref.read(authSessionProvider.notifier).clear();
+      if (mounted) context.go(AppRoutes.welcome);
     }
   }
 

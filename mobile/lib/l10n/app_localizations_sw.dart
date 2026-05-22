@@ -42,7 +42,7 @@ class AppLocalizationsSw extends AppLocalizations {
   String get sendOtp => 'Tuma OTP';
 
   @override
-  String get verifyOtp => 'Thibitisha OTP';
+  String get verifyOtp => 'Thibitisha nambari';
 
   @override
   String otpSentTo(String phone) {
@@ -278,10 +278,161 @@ class AppLocalizationsSw extends AppLocalizations {
   String get roleChairperson => 'Mwenyekiti';
 
   @override
+  String get roleProvisionalChair => 'Mwenyekiti wa Muda';
+
+  @override
+  String get interimChairBanner =>
+      'Wewe ni mwenyekiti wa muda hadi uongozi ukamilike. Unaweza kusajili wanachama na kuweka uongozi pekee. Shughuli nyingine za kikundi zitafunguliwa baada ya kuweka mwenyekiti, katibu na mhasibu.';
+
+  @override
+  String get setupGovernanceTitle => 'Anza hapa';
+
+  @override
+  String get setupGovernance => 'Weka uongozi';
+
+  @override
+  String get governanceLockedMessage =>
+      'Kamilisha uongozi kwanza. Sajili wanachama na weka mwenyekiti, katibu na mhasibu.';
+
+  @override
   String get roleSecretary => 'Katibu';
 
   @override
   String get roleMember => 'Mwanachama';
+
+  @override
+  String get roleMoneyCounter => 'Mhesabu Fedha';
+
+  @override
+  String get roleKeyHolder => 'Mwenye Funguo';
+
+  @override
+  String get governance => 'Utawala';
+
+  @override
+  String get currentLeadership => 'Uongozi wa Sasa';
+
+  @override
+  String get elections => 'Uchaguzi';
+
+  @override
+  String get createElection => 'Unda Uchaguzi';
+
+  @override
+  String get assignLeadership => 'Teua Uongozi';
+
+  @override
+  String get registerMember => 'Sajili mwanachama';
+
+  @override
+  String get governanceSetupTitle => 'Kuandaa kikundi';
+
+  @override
+  String get governanceStep1 =>
+      'Sajili wanachama wengine (angalau mmoja zaidi)';
+
+  @override
+  String get governanceStep2 =>
+      'Teua mwenyekiti, katibu, mhasibu na mhesabaji wa fedha';
+
+  @override
+  String get memberCountLabel => 'Wanachama wa kikundi';
+
+  @override
+  String memberCountValue(int count) {
+    return '$count hai';
+  }
+
+  @override
+  String get membersNeededForLeadership =>
+      'Ongeza angalau mwanachama mmoja kabla ya kuteua uongozi';
+
+  @override
+  String get governancePermissionHint =>
+      'Unahitaji ruhusa ya kusimamia wanachama na kuteua uongozi. Ukiwa ndiye uliyeunda kikundi, toka kisha ingia tena ili kusasisha nafasi yako.';
+
+  @override
+  String get governanceReloginHint => 'Sasisha kikao';
+
+  @override
+  String get assignLeadershipSetupHint =>
+      'Wakati wa kuandaa, nafasi zinateuliwa mara moja. Teua mwenyekiti, katibu na mhasibu ili kufungua huduma kamili za kikundi.';
+
+  @override
+  String get selectMember => 'Chagua mwanachama';
+
+  @override
+  String get assignRole => 'Teua nafasi';
+
+  @override
+  String get leadershipAssigned => 'Nafasi ya uongozi imeteuliwa';
+
+  @override
+  String get viewAll => 'Angalia zote';
+
+  @override
+  String get noLeadershipYet =>
+      'Hakuna uongozi uliochaguliwa. Fanya uchaguzi kuteua viongozi.';
+
+  @override
+  String get noOpenElections => 'Hakuna uchaguzi ulio wazi';
+
+  @override
+  String get noCandidatesYet => 'Hakuna wagombea bado';
+
+  @override
+  String get candidates => 'Wagombea';
+
+  @override
+  String get electionResults => 'Matokeo ya Uchaguzi';
+
+  @override
+  String get openElection => 'Fungua Kupiga Kura';
+
+  @override
+  String get closeElection => 'Funga na Hesabu';
+
+  @override
+  String get votingScreen => 'Kupiga Kura';
+
+  @override
+  String get voteRecorded => 'Kura yako imehifadhiwa';
+
+  @override
+  String get electionCreated => 'Uchaguzi umeundwa';
+
+  @override
+  String get electionTitle => 'Jina la uchaguzi';
+
+  @override
+  String get description => 'Maelezo';
+
+  @override
+  String get quorumPercent => 'Quorum';
+
+  @override
+  String get manualAssignmentHint =>
+      'Pendekeza nafasi ya uongozi. Wanachama lazima waidhinishe kufikia quorum.';
+
+  @override
+  String get role => 'Nafasi';
+
+  @override
+  String get memberId => 'Nambari ya Mwanachama';
+
+  @override
+  String get reason => 'Sababu';
+
+  @override
+  String get submitForApproval => 'Wasilisha kwa idhini ya wanachama';
+
+  @override
+  String get assignmentProposed =>
+      'Pendekezo limewasilishwa — linasubiri kura za wanachama';
+
+  @override
+  String get platformAdminWebOnly =>
+      'Usimamizi wa jukwaa unapatikana tu kwenye Web Admin Panel. Tumia akaunti ya mwanachama wa VICOBA katika programu hii.';
 
   @override
   String get dashboardAdmin => 'Dashibodi — Msimamizi';
@@ -433,9 +584,6 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get recentActivity => 'Shughuli za Hivi Karibuni';
-
-  @override
-  String get selectMember => 'Chagua mwanachama';
 
   @override
   String get shareQuantity => 'Idadi ya hisa';
@@ -668,6 +816,67 @@ class AppLocalizationsSw extends AppLocalizations {
   String get memberAdded => 'Mwanachama ameongezwa';
 
   @override
+  String get memberActivationRegister =>
+      'Waombe wafungue programu → Jisajili → namba hii hiyo → OTP → PIN tarakimu 4. Kisha waingie.';
+
+  @override
+  String get memberActivationLogin =>
+      'Tayari ana akaunti. Anaweza kuingia kwa namba hii na PIN yake.';
+
+  @override
+  String get temporaryPinTitle => 'PIN ya muda imetengenezwa';
+
+  @override
+  String temporaryPinMessage(String name) {
+    return 'Mpe $name PIN hii. Aingie kwa namba ya simu na PIN hii, kisha achague PIN mpya.';
+  }
+
+  @override
+  String temporaryPinValue(String pin) {
+    return 'PIN ya muda: $pin';
+  }
+
+  @override
+  String get temporaryPinDevHint =>
+      'Katika maendeleo, PIN ya muda kawaida ni tarakimu 4 za mwisho za namba ya simu.';
+
+  @override
+  String get changePinRequiredTitle => 'Unda PIN yako mpya';
+
+  @override
+  String get changePinRequiredSubtitle =>
+      'Umeingia kwa PIN ya muda. Chagua PIN mpya ya tarakimu 4 ili kuendelea — huwezi kuruka hatua hii.';
+
+  @override
+  String get pinCannotMatchTemporary =>
+      'PIN mpya lazima iwe tofauti na PIN ya muda.';
+
+  @override
+  String get changeProfilePhoto => 'Badilisha picha ya wasifu';
+
+  @override
+  String get uploadFromGallery => 'Chagua kutoka ghala';
+
+  @override
+  String get takePhoto => 'Piga picha';
+
+  @override
+  String get removeProfilePhoto => 'Ondoa picha';
+
+  @override
+  String get profilePhotoUpdated => 'Picha ya wasifu imesasishwa';
+
+  @override
+  String get profilePhotoRemoved => 'Picha ya wasifu imeondolewa';
+
+  @override
+  String get profilePhotoUploadFailed => 'Imeshindwa kupakia picha ya wasifu';
+
+  @override
+  String get cameraNotAvailableOnWeb =>
+      'Kamera haipatikani kwenye kivinjari. Chagua kutoka ghala.';
+
+  @override
   String get filterAll => 'Wote';
 
   @override
@@ -856,10 +1065,108 @@ class AppLocalizationsSw extends AppLocalizations {
   String get loginSubtitle => 'Ingia kwa nambari ya simu na PIN';
 
   @override
-  String get tryDemoAccount => 'Jaribu akaunti ya demo';
+  String get welcomeTitle => 'Karibu Digital Vikoba';
 
   @override
-  String get demoPinLabel => 'PIN ya demo: 1234';
+  String get welcomeSubtitle =>
+      'Jisajili kikundi chako, okoa pamoja, na simamia mikopo kwa uwazi.';
+
+  @override
+  String get getStarted => 'Anza sasa';
+
+  @override
+  String get alreadyHaveAccount => 'Tayari nina akaunti';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Umesajiliwa? Ingia';
+
+  @override
+  String get backToWelcome => 'Rudi';
+
+  @override
+  String get registerSubtitle =>
+      'Unda akaunti yako kwa nambari ya simu. Tutakutumia nambari ya uthibitisho.';
+
+  @override
+  String get registerChooseLanguageTitle => 'Chagua lugha yako';
+
+  @override
+  String get registerChooseLanguageSubtitle =>
+      'Chagua lugha unayopendelea kabla ya kujisajili. Unaweza kubadilisha baadaye.';
+
+  @override
+  String get registerContinue => 'Endelea na usajili';
+
+  @override
+  String get changeLanguage => 'Badilisha lugha';
+
+  @override
+  String get invalidPhone => 'Weka nambari sahihi ya Tanzania (mf. 0712345678)';
+
+  @override
+  String get pinMismatch => 'PIN hazifanani';
+
+  @override
+  String get pinMatches => 'PIN zinafanana';
+
+  @override
+  String get otpMustBe6 => 'Weka nambari 6 za uthibitisho';
+
+  @override
+  String get invalidOtp => 'Nambari si sahihi au imekwisha';
+
+  @override
+  String get otpSendFailed => 'Imeshindwa kutuma nambari ya uthibitisho';
+
+  @override
+  String get otpResent => 'Nambari imetumwa tena';
+
+  @override
+  String get resendOtp => 'Tuma tena';
+
+  @override
+  String resendIn(int seconds) {
+    return 'Tuma tena baada ya ${seconds}s';
+  }
+
+  @override
+  String get otpEnterSubtitle =>
+      'Weka nambari 6 za uthibitisho zilizotumwa kwenye simu yako';
+
+  @override
+  String get registrationExpired => 'Muda wa usajili umeisha. Anza upya.';
+
+  @override
+  String get pinSetupSubtitle =>
+      'Chagua PIN ya tarakimu 4. Utaitumia kuingia kwa usalama.';
+
+  @override
+  String get onboardingTitle => 'Sanidi kikundi chako';
+
+  @override
+  String get onboardingSubtitle =>
+      'Hujajiunga na kikundi cha VICOBA. Unda kikundi kama mwanachama wa kwanza, au jiunge kwa mwaliko.';
+
+  @override
+  String get createYourGroup => 'Unda kikundi chako cha VICOBA';
+
+  @override
+  String get createGroupHint =>
+      'Kama mwanachama wa kwanza, unaweza kuanzisha kikundi na kuwaalika wengine.';
+
+  @override
+  String get joinWithInvite => 'Nina mwaliko';
+
+  @override
+  String get inviteComingSoon =>
+      'Viungo vya mwaliko vitapatikana hivi karibuni. Muulize katibu wa kikundi akuongeze kwa nambari ya simu.';
+
+  @override
+  String get connectionError =>
+      'Haiwezi kuunganisha na seva. Hakikisha backend inaendesha.';
+
+  @override
+  String get devOtpHint => 'Maendeleo: nambari ya uthibitisho ni 123456';
 
   @override
   String get notificationsSubtitle => 'Arifa za kikundi na mfumo';

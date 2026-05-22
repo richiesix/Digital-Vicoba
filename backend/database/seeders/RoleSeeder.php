@@ -14,6 +14,7 @@ final class RoleSeeder extends Seeder
         $roles = [
             ['name' => 'Super Admin', 'slug' => 'super_admin', 'description' => 'Platform-wide administration', 'is_system' => true],
             ['name' => 'Regional Admin', 'slug' => 'regional_admin', 'description' => 'Regional oversight', 'is_system' => true],
+            ['name' => 'Provisional Chairperson', 'slug' => 'provisional_chair', 'description' => 'Interim group founder until governance is established', 'is_system' => false],
             ['name' => 'Group Chairperson', 'slug' => 'chairperson', 'description' => 'Group leadership', 'is_system' => false],
             ['name' => 'Secretary', 'slug' => 'secretary', 'description' => 'Records and meetings', 'is_system' => false],
             ['name' => 'Treasurer', 'slug' => 'treasurer', 'description' => 'Group financial operations', 'is_system' => false],

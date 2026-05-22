@@ -60,9 +60,22 @@ final class GroupController extends Controller
             'meeting_frequency' => 'nullable|in:weekly,biweekly,monthly',
         ]);
 
+        $user = $request->user();
+
+        $canManageGroups = $this->rbac->hasPermission($user, 'platform.manage_groups')
+            || $this->rbac->hasPermission($user, 'platform.full_access');
+
+        if (! $canManageGroups && Member::query()->where('user_id', $user->id)->exists()) {
+            return response()->json([
+                'message' => 'Tayari uko katika kikundi. Tumia mwaliko kujiunga na kikundi kingine.',
+            ], 422);
+        }
+
         $group = VicobaGroup::query()->create([
             ...$data,
-            'created_by' => $request->user()->id,
+            'created_by' => $user->id,
+            'interim_chair_user_id' => $user->id,
+            'governance_complete' => false,
             'status' => 'forming',
         ]);
 
@@ -73,7 +86,31 @@ final class GroupController extends Controller
             'status' => 'active',
         ]);
 
-        return response()->json(['group' => $group->load('activeCycle')], 201);
+        $provisionalRoleId = \Illuminate\Support\Facades\DB::table('roles')->where('slug', 'provisional_chair')->value('id');
+        if ($provisionalRoleId) {
+            \Illuminate\Support\Facades\DB::table('user_roles')->updateOrInsert(
+                ['user_id' => $user->id, 'role_id' => $provisionalRoleId, 'group_id' => $group->id],
+                ['assigned_by' => $user->id, 'assigned_at' => now()]
+            );
+        }
+
+        Member::query()->create([
+            'group_id' => $group->id,
+            'user_id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'phone_number' => $user->phone_number,
+            'member_number' => '001',
+            'join_date' => now()->toDateString(),
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'group' => $group->load('activeCycle'),
+            'message' => 'Kikundi kimeundwa. Sajili wanachama kisha weka uongozi wa kikundi.',
+            'is_interim_chair' => true,
+            'governance_complete' => false,
+        ], 201);
     }
 
     public function dashboard(VicobaGroup $group): JsonResponse

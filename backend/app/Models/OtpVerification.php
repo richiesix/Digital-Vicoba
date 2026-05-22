@@ -6,6 +6,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $otp_hash
+ * @property int $attempts
+ */
 final class OtpVerification extends Model
 {
     public $timestamps = false;

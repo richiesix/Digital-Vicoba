@@ -15,6 +15,9 @@ class ApiClient {
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
+        if (options.data is FormData) {
+          options.headers.remove('Content-Type');
+        }
         final token = await _storage.read(key: 'access_token');
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
@@ -63,6 +66,24 @@ class ApiClient {
     return _dio.patch(path, data: data);
   }
 
+  Future<Response<dynamic>> delete(String path) {
+    return _dio.delete(path);
+  }
+
+  Future<Response<dynamic>> postMultipart(
+    String path, {
+    required FormData formData,
+  }) {
+    return _dio.post(
+      path,
+      data: formData,
+      options: Options(
+        contentType: Headers.multipartFormDataContentType,
+        headers: {'Accept': 'application/json'},
+      ),
+    );
+  }
+
   Future<void> saveTokens(String access, String refresh) async {
     await _storage.write(key: 'access_token', value: access);
     await _storage.write(key: 'refresh_token', value: refresh);
@@ -89,5 +110,14 @@ class ApiClient {
   Future<bool> hasToken() async {
     final token = await _storage.read(key: 'access_token');
     return token != null && token.isNotEmpty;
+  }
+
+  Future<String?> getAccessToken() => _storage.read(key: 'access_token');
+
+  Future<Map<String, String>> profilePhotoHeaders() async {
+    final token = await getAccessToken();
+    if (token == null || token.isEmpty) return {};
+
+    return {'Authorization': 'Bearer $token'};
   }
 }

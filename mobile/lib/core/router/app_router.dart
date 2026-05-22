@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/onboarding_screen.dart';
+import '../../features/auth/screens/welcome_screen.dart';
 import '../../features/auth/screens/otp_screen.dart';
 import '../../features/auth/screens/pin_setup_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
@@ -18,6 +20,11 @@ import '../../core/reports/report_storage_service.dart';
 import '../../features/reports/screens/report_viewer_screen.dart';
 import '../../features/reports/screens/reports_screen.dart';
 import '../../features/savings/screens/savings_screen.dart';
+import '../../features/governance/screens/assign_leadership_screen.dart';
+import '../../features/governance/screens/create_election_screen.dart';
+import '../../features/governance/screens/election_detail_screen.dart';
+import '../../features/governance/screens/elections_list_screen.dart';
+import '../../features/governance/screens/governance_dashboard_screen.dart';
 import '../../features/share_out/screens/share_out_screen.dart';
 import '../../features/sync/screens/sync_status_screen.dart';
 import '../l10n/l10n_extension.dart';
@@ -25,6 +32,8 @@ import '../widgets/main_shell.dart';
 
 class AppRoutes {
   static const splash = '/';
+  static const welcome = '/welcome';
+  static const onboarding = '/onboarding';
   static const login = '/login';
   static const register = '/register';
   static const otp = '/otp';
@@ -42,6 +51,11 @@ class AppRoutes {
   static const shareOut = '/share-out';
   static const profile = '/profile';
   static const sync = '/sync';
+  static const governance = '/governance';
+  static const governanceElections = '/governance/elections';
+  static const governanceCreateElection = '/governance/elections/create';
+  static const governanceAssignLeadership = '/governance/assign';
+  static const governanceElectionDetail = '/governance/elections';
 }
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -63,6 +77,14 @@ final appRouter = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
+      path: AppRoutes.welcome,
+      builder: (context, state) => const WelcomeScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.onboarding,
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
       path: AppRoutes.login,
       builder: (context, state) => const LoginScreen(),
     ),
@@ -79,7 +101,9 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.pinSetup,
-      builder: (context, state) => const PinSetupScreen(),
+      builder: (context, state) => PinSetupScreen(
+        forcedChange: state.uri.queryParameters['forced'] == '1',
+      ),
     ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
@@ -142,6 +166,29 @@ final appRouter = GoRouter(
         GoRoute(
           path: AppRoutes.sync,
           builder: (context, state) => const SyncStatusScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.governance,
+          builder: (context, state) => const GovernanceDashboardScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.governanceElections,
+          builder: (context, state) => const ElectionsListScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.governanceCreateElection,
+          builder: (context, state) => const CreateElectionScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.governanceAssignLeadership,
+          builder: (context, state) => const AssignLeadershipScreen(),
+        ),
+        GoRoute(
+          path: '${AppRoutes.governanceElectionDetail}/:id',
+          builder: (context, state) {
+            final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+            return ElectionDetailScreen(electionId: id);
+          },
         ),
       ],
     ),

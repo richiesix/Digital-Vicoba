@@ -34,7 +34,8 @@ export default function App() {
       <div className="flex min-h-screen">
         <aside className="w-64 bg-primary text-white p-4">
           <h1 className="text-xl font-bold mb-2">Digital Vikoba</h1>
-          <p className="text-sm text-white/70 mb-8">Msimamizi Mkuu</p>
+          <p className="text-sm text-white/70 mb-2">Msimamizi Mkuu</p>
+          <p className="text-xs text-white/50 mb-8">Mipangilio ya mfumo pekee — shughuli za vikundi kwenye simu</p>
           <nav className="space-y-2">
             {nav.map(({ to, icon: Icon, label, permission }) => (
               <RoleGate key={to} permission={permission}>

@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+/**
+ * @property int|null $created_by
+ * @property int|null $interim_chair_user_id
+ * @property bool $governance_complete
+ * @property string|null $status
+ */
 final class VicobaGroup extends Model
 {
     use SoftDeletes;
@@ -20,12 +26,13 @@ final class VicobaGroup extends Model
         'uuid', 'name', 'registration_number', 'region_id', 'ward', 'village',
         'share_price', 'currency', 'max_loan_multiplier', 'loan_interest_rate',
         'penalty_rate', 'meeting_day', 'meeting_frequency', 'constitution_json',
-        'status', 'formed_at', 'created_by',
+        'status', 'formed_at', 'created_by', 'governance_complete', 'interim_chair_user_id',
     ];
 
     protected function casts(): array
     {
         return [
+            'governance_complete' => 'boolean',
             'share_price' => 'decimal:2',
             'max_loan_multiplier' => 'decimal:2',
             'loan_interest_rate' => 'decimal:2',

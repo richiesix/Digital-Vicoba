@@ -26,6 +26,7 @@ final class GroupSeeder extends Seeder
                 'penalty_rate' => 5,
                 'meeting_frequency' => 'weekly',
                 'status' => 'active',
+                'governance_complete' => true,
                 'formed_at' => now()->subMonths(6)->toDateString(),
             ]
         );
@@ -59,7 +60,7 @@ final class GroupSeeder extends Seeder
         );
 
         $users = User::query()->orderBy('id')->get();
-        $roles = ['super_admin', 'treasurer', 'member'];
+        $roles = ['chairperson', 'treasurer', 'member'];
         $memberData = [
             ['Asha', 'Mohamed', '001'],
             ['Fatuma', 'Ali', '002'],
@@ -74,7 +75,7 @@ final class GroupSeeder extends Seeder
                 [
                     'user_id' => $user->id,
                     'role_id' => $roleId,
-                    'group_id' => $roleSlug === 'super_admin' ? null : $group->id,
+                    'group_id' => $group->id,
                 ],
                 [
                     'region_id' => null,
@@ -82,19 +83,36 @@ final class GroupSeeder extends Seeder
                 ]
             );
 
-            if ($roleSlug !== 'super_admin') {
-                Member::query()->updateOrCreate(
-                    ['group_id' => $group->id, 'phone_number' => $user->phone_number],
+            $member = Member::query()->updateOrCreate(
+                ['group_id' => $group->id, 'phone_number' => $user->phone_number],
+                [
+                    'uuid' => (string) Str::uuid(),
+                    'user_id' => $user->id,
+                    'member_number' => $memberData[$i][2] ?? '00'.($i + 1),
+                    'first_name' => $memberData[$i][0],
+                    'last_name' => $memberData[$i][1],
+                    'join_date' => now()->subMonths(5)->toDateString(),
+                    'status' => 'active',
+                    'total_shares' => ($i + 1) * 5,
+                    'savings_balance' => ($i + 1) * 50000,
+                ]
+            );
+
+            if (in_array($roleSlug, ['chairperson', 'treasurer'], true)) {
+                DB::table('leadership_roles')->updateOrInsert(
                     [
-                        'uuid' => (string) Str::uuid(),
-                        'user_id' => $user->id,
-                        'member_number' => $memberData[$i][2] ?? '00'.($i + 1),
-                        'first_name' => $memberData[$i][0],
-                        'last_name' => $memberData[$i][1],
-                        'join_date' => now()->subMonths(5)->toDateString(),
-                        'status' => 'active',
-                        'total_shares' => ($i + 1) * 5,
-                        'savings_balance' => ($i + 1) * 50000,
+                        'group_id' => $group->id,
+                        'role_name' => $roleSlug,
+                        'active' => true,
+                    ],
+                    [
+                        'member_id' => $member->id,
+                        'start_date' => now()->subMonths(5)->toDateString(),
+                        'end_date' => null,
+                        'assigned_by' => $user->id,
+                        'assignment_method' => 'manual',
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]
                 );
             }

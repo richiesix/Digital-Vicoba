@@ -1,3 +1,7 @@
+/**
+ * Web admin is platform-only (system / regional operators).
+ * Day-to-day VICOBA group ops (members, governance, finance) belong on the mobile app.
+ */
 export type AdminRole = 'super_admin' | 'regional_admin' | 'treasurer' | 'member'
 
 const ROLE_KEY = 'dv_admin_role'
@@ -22,7 +26,7 @@ export const adminPermissions: Record<AdminRole, string[]> = {
     'platform.fraud_alerts',
     'platform.system_logs',
   ],
-  regional_admin: ['platform.national_analytics', 'platform.manage_groups'],
+  regional_admin: ['platform.national_analytics'],
   treasurer: [],
   member: [],
 }

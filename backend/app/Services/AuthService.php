@@ -10,7 +10,7 @@ use App\Models\OtpVerification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final class AuthService
 {
@@ -19,6 +19,7 @@ final class AuthService
         private readonly SmsService $sms,
         private readonly AuditService $audit,
         private readonly RbacService $rbac,
+        private readonly MemberEnrollmentService $enrollment,
     ) {}
 
     public function sendOtp(string $phone, string $purpose): void
@@ -58,7 +59,10 @@ final class AuthService
 
     public function register(array $data): User
     {
-        return User::query()->create([
+        $data['phone_number'] = PhoneNumber::normalize($data['phone_number']);
+
+        /** @var User $user */
+        $user = User::query()->create([
             'phone_number' => $data['phone_number'],
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
@@ -67,26 +71,32 @@ final class AuthService
             'preferred_language' => $data['preferred_language'] ?? 'sw',
             'phone_verified_at' => now(),
         ]);
+
+        $this->enrollment->linkPendingMembersForUser($user);
+
+        return $user;
     }
 
     public function setupPin(User $user, string $pin): void
     {
-        $user->update(['pin_hash' => Hash::make($pin)]);
+        if ($user->must_change_pin && $user->pin_hash && Hash::check($pin, $user->pin_hash)) {
+            throw ValidationException::withMessages([
+                'pin' => ['Choose a new PIN that is different from your temporary PIN.'],
+            ]);
+        }
+
+        $user->update([
+            'pin_hash' => Hash::make($pin),
+            'must_change_pin' => false,
+            'temporary_pin_issued_at' => null,
+        ]);
         $this->audit->log($user, 'pin_setup', 'user', $user->id);
     }
 
-    public function loginWithPin(string $phone, string $pin): ?array
+    /** @return array<string, mixed> */
+    public function buildMobileAuthResponse(User $user): array
     {
-        $phone = PhoneNumber::normalize($phone);
-        $user = User::query()->where('phone_number', $phone)->where('is_active', true)->first();
-        if (! $user || ! $user->pin_hash || ! Hash::check($pin, $user->pin_hash)) {
-            return null;
-        }
-
-        $user->update(['last_login_at' => now()]);
-        $this->audit->log($user, 'login', 'user', $user->id);
-
-        $profile = $this->rbac->buildAuthProfile($user);
+        $profile = $this->rbac->buildAuthProfile($user, forMobile: true);
 
         return [
             'user' => $user,
@@ -100,7 +110,26 @@ final class AuthService
             'roles' => $profile['roles'],
             'group_id' => $profile['group_id'],
             'member_id' => $profile['member_id'],
+            'is_platform_only' => $profile['is_platform_only'] ?? false,
+            'governance_complete' => $profile['governance_complete'] ?? true,
+            'is_interim_chair' => $profile['is_interim_chair'] ?? false,
+            'requires_pin_change' => (bool) $user->must_change_pin,
+            'must_change_pin' => (bool) $user->must_change_pin,
         ];
+    }
+
+    public function loginWithPin(string $phone, string $pin): ?array
+    {
+        $phone = PhoneNumber::normalize($phone);
+        $user = User::query()->where('phone_number', $phone)->where('is_active', true)->first();
+        if (! $user instanceof User || ! $user->pin_hash || ! Hash::check($pin, $user->pin_hash)) {
+            return null;
+        }
+
+        $user->update(['last_login_at' => now()]);
+        $this->audit->log($user, 'login', 'user', $user->id);
+
+        return $this->buildMobileAuthResponse($user);
     }
 
     public function bindDevice(User $user, array $data): Device

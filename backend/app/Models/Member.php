@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $group_id
+ * @property int|null $user_id
+ */
 final class Member extends Model
 {
     use SoftDeletes;

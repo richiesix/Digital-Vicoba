@@ -379,8 +379,8 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
                   ),
                 ],
                 const SizedBox(height: 20),
-                Text(l10n.paymentMethod, style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
+                Text(l10n.paymentMethod, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                const SizedBox(height: 8),
                 _PaymentGrid(
                   selected: _paymentMethod,
                   onSelect: (m) {
@@ -710,36 +710,45 @@ class _PaymentGrid extends StatelessWidget {
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.1,
+      mainAxisSpacing: 6,
+      crossAxisSpacing: 6,
+      childAspectRatio: 1.55,
       children: _methods.map((m) {
         final isSel = selected == m.$1;
         return Material(
-          color: isSel ? m.$3.withValues(alpha: 0.15) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isSel ? m.$3.withValues(alpha: 0.14) : m.$3.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(10),
+          elevation: isSel ? 2 : 0,
+          shadowColor: m.$3.withValues(alpha: 0.25),
           child: InkWell(
             onTap: () => onSelect(m.$1),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isSel ? m.$3 : Colors.grey.shade300,
-                  width: isSel ? 2 : 1,
+                  width: isSel ? 1.5 : 1,
                 ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(m.$2, color: m.$3, size: 28),
-                  const SizedBox(height: 6),
+                  Icon(m.$2, color: m.$3, size: 20),
+                  const SizedBox(height: 4),
                   Text(
                     m.$1 == 'cash' ? l10n.cash : m.$1.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 9,
+                      fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
+                      color: isSel ? m.$3 : Colors.grey.shade700,
+                      letterSpacing: 0.2,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

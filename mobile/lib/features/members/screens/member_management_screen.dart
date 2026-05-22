@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,8 @@ import '../../../core/auth/auth_session.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/glass_screen_background.dart';
 import '../../../core/widgets/nav_icons.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -52,7 +56,16 @@ class _MemberManagementScreenState extends ConsumerState<MemberManagementScreen>
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.trim().toLowerCase());
     });
-    _load();
+    _load().then((_) => _maybeOpenRegisterFromQuery());
+  }
+
+  void _maybeOpenRegisterFromQuery() {
+    if (!mounted) return;
+    final register = GoRouterState.of(context).uri.queryParameters['register'];
+    if (register != '1') return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _showAddMember();
+    });
   }
 
   @override
@@ -131,13 +144,34 @@ class _MemberManagementScreenState extends ConsumerState<MemberManagementScreen>
 
   Future<void> _showAddMember() async {
     final session = ref.read(authSessionProvider);
-    if (!(session?.hasPermission('group.manage_members') ?? false)) return;
+    final inSetup = session?.needsGovernanceSetup == true;
+    final canManage = session?.canManageMembers == true || inSetup;
+
+    if (!canManage) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.governancePermissionHint)),
+      );
+      return;
+    }
+
+    var activeSession = session;
+    if (inSetup && activeSession != null && !activeSession.hasPermission('group.manage_members')) {
+      try {
+        final me = await ref.read(apiClientProvider).get('/auth/me');
+        final refreshed = AuthSession.fromProfile(me.data as Map<String, dynamic>);
+        await ref.read(authSessionProvider.notifier).setSession(refreshed);
+        activeSession = refreshed;
+      } catch (_) {}
+    }
+
+    if (!mounted || activeSession?.groupId == null) return;
 
     final added = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _AddMemberSheet(groupId: session!.groupId!),
+      builder: (ctx) => _AddMemberSheet(groupId: activeSession!.groupId!),
     );
 
     if (added == true) {
@@ -153,82 +187,88 @@ class _MemberManagementScreenState extends ConsumerState<MemberManagementScreen>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final session = ref.watch(authSessionProvider);
-    final canManage = session?.hasPermission('group.manage_members') ?? false;
+    final canManage = session?.canManageMembers == true;
     final currency = NumberFormat.currency(locale: 'sw_TZ', symbol: 'TZS ', decimalDigits: 0);
     final filtered = _filteredMembers;
 
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: GlassScreenBackground(
+          child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+        ),
+      );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      extendBody: true,
       floatingActionButton: canManage
           ? FloatingActionButton.extended(
-              onPressed: _showAddMember,
-              backgroundColor: AppColors.savings,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _showAddMember();
+              },
+              elevation: 6,
+              backgroundColor: const Color(0xFF1B5E20),
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.add, color: Colors.white, size: 26),
+              icon: const Icon(Icons.person_add_alt_1),
               label: Text(
                 l10n.addMember,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             )
           : null,
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(child: _MembersHeader(l10n: l10n, onBack: () => context.pop())),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatChip(
-                        icon: Icons.people,
-                        label: l10n.activeMembers,
-                        value: '$_activeCount/${_members.length}',
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatChip(
-                        icon: Icons.savings_outlined,
-                        label: l10n.totalGroupSavings,
-                        value: currency.format(_totalSavings),
-                      ),
-                    ),
-                  ],
+      body: GlassScreenBackground(
+        child: RefreshIndicator(
+          onRefresh: _load,
+          color: Colors.white,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: _MembersHeader(
+                  l10n: l10n,
+                  showBack: context.canPop(),
+                  onBack: () => context.pop(),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: l10n.searchMembersHint,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              HapticFeedback.selectionClick();
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatChip(
+                          icon: Icons.people_outline,
+                          label: l10n.activeMembers,
+                          value: '$_activeCount/${_members.length}',
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _StatChip(
+                          icon: Icons.savings_outlined,
+                          label: l10n.totalGroupSavings,
+                          value: currency.format(_totalSavings),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _GlassSearchField(
+                    controller: _searchController,
+                    hint: l10n.searchMembersHint,
+                    onClear: () {
+                      _searchController.clear();
+                      HapticFeedback.selectionClick();
+                    },
+                    showClear: _searchQuery.isNotEmpty,
+                  ),
+                ),
+              ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -273,15 +313,19 @@ class _MemberManagementScreenState extends ConsumerState<MemberManagementScreen>
             ),
             if (filtered.isEmpty)
               SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 280,
-                  child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: GlassCard(
+                    blur: 12,
+                    opacity: 0.5,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.person_search, size: 64, color: Colors.grey.shade400),
+                        Icon(Icons.person_search, size: 48, color: Colors.grey.shade600),
                         const SizedBox(height: 12),
-                        Text(l10n.noMembersFound, style: TextStyle(color: Colors.grey.shade600)),
+                        Text(
+                          l10n.noMembersFound,
+                          style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                   ),
@@ -307,76 +351,133 @@ class _MemberManagementScreenState extends ConsumerState<MemberManagementScreen>
           ],
         ),
       ),
+      ),
     );
   }
 }
 
 class _MembersHeader extends StatelessWidget {
-  const _MembersHeader({required this.l10n, required this.onBack});
+  const _MembersHeader({
+    required this.l10n,
+    required this.showBack,
+    required this.onBack,
+  });
 
   final AppLocalizations l10n;
+  final bool showBack;
   final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: Row(
-                  children: [
-                    SvgPicture.asset(
-                      NavIcons.groups,
-                      width: 32,
-                      height: 32,
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.members,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            l10n.membersSubtitle,
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
-                          ),
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 16, 12),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                if (showBack)
+                  IconButton(
+                    onPressed: onBack,
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                  )
+                else
+                  const SizedBox(width: 48),
+                const Spacer(),
+              ],
+            ),
+            GlassCard(
+              blur: 14,
+              opacity: 0.48,
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.25),
+                          AppColors.savings.withValues(alpha: 0.12),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                    child: SvgPicture.asset(
+                      NavIcons.groups,
+                      width: 28,
+                      height: 28,
+                      colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.members,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade900,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.membersSubtitle,
+                          style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassSearchField extends StatelessWidget {
+  const _GlassSearchField({
+    required this.controller,
+    required this.hint,
+    required this.onClear,
+    required this.showClear,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final VoidCallback onClear;
+  final bool showClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      blur: 10,
+      opacity: 0.45,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: TextField(
+        controller: controller,
+        style: TextStyle(color: Colors.grey.shade900, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade500),
+          prefixIcon: Icon(Icons.search, color: Colors.grey.shade600, size: 22),
+          suffixIcon: showClear
+              ? IconButton(
+                  icon: Icon(Icons.close_rounded, color: Colors.grey.shade600, size: 20),
+                  onPressed: onClear,
+                )
+              : null,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ),
     );
@@ -392,24 +493,38 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.savings, size: 22),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                  Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                ],
-              ),
+    return GlassCard(
+      blur: 12,
+      opacity: 0.52,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.savings.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
             ),
-          ],
-        ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.grey.shade900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -424,18 +539,32 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) {
+    return GestureDetector(
+      onTap: () {
         HapticFeedback.selectionClick();
         onTap();
       },
-      selectedColor: AppColors.savings.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.savings,
-      labelStyle: TextStyle(
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-        color: selected ? AppColors.savings : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: selected
+              ? Colors.white.withValues(alpha: 0.75)
+              : Colors.white.withValues(alpha: 0.35),
+          border: Border.all(
+            color: selected ? AppColors.savings : Colors.white.withValues(alpha: 0.5),
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 13,
+            color: selected ? AppColors.primary : Colors.grey.shade800,
+          ),
+        ),
       ),
     );
   }
@@ -462,14 +591,12 @@ class _SortButton extends StatelessWidget {
         HapticFeedback.selectionClick();
         onChanged(v);
       },
-      icon: Container(
+      icon: GlassCard(
+        blur: 8,
+        opacity: 0.5,
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: const Icon(Icons.sort, color: AppColors.savings),
+        borderRadius: 12,
+        child: const Icon(Icons.sort_rounded, color: AppColors.primary, size: 20),
       ),
       itemBuilder: (_) => [
         PopupMenuItem(value: _MemberSort.name, child: Text(sortName)),
@@ -504,27 +631,36 @@ class _MemberCard extends StatelessWidget {
     final isActive = member['status'] == 'active';
     final memberNo = member['member_number']?.toString() ?? '${index + 1}';
 
-    return Card(
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 10),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 26,
-                backgroundColor: AppColors.savings.withValues(alpha: 0.15),
-                child: Text(
-                  displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: AppColors.savings,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
+      blur: 12,
+      opacity: 0.55,
+      onTap: onTap,
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.savings.withValues(alpha: 0.3),
+                  AppColors.primary.withValues(alpha: 0.15),
+                ],
               ),
+            ),
+            child: Text(
+              displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -577,11 +713,9 @@ class _MemberCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.savings),
+              Icon(Icons.chevron_right_rounded, color: Colors.grey.shade500),
             ],
           ),
-        ),
-      ),
     );
   }
 }
@@ -714,6 +848,9 @@ class _AddMemberSheetState extends ConsumerState<_AddMemberSheet> {
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
   final _phone = TextEditingController();
+  final _firstNameFocus = FocusNode();
+  final _lastNameFocus = FocusNode();
+  final _phoneFocus = FocusNode();
   bool _submitting = false;
 
   @override
@@ -721,6 +858,9 @@ class _AddMemberSheetState extends ConsumerState<_AddMemberSheet> {
     _firstName.dispose();
     _lastName.dispose();
     _phone.dispose();
+    _firstNameFocus.dispose();
+    _lastNameFocus.dispose();
+    _phoneFocus.dispose();
     super.dispose();
   }
 
@@ -728,12 +868,62 @@ class _AddMemberSheetState extends ConsumerState<_AddMemberSheet> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
-      await ref.read(apiClientProvider).post('/groups/${widget.groupId}/members', data: {
+      final res = await ref.read(apiClientProvider).post('/groups/${widget.groupId}/members', data: {
         'first_name': _firstName.text.trim(),
         'last_name': _lastName.text.trim(),
         'phone_number': _phone.text.trim(),
       });
       HapticFeedback.mediumImpact();
+      if (!mounted) return;
+
+      final tempPin = res.data['temporary_pin']?.toString();
+      final memberName =
+          '${_firstName.text.trim()} ${_lastName.text.trim()}'.trim();
+
+      if (tempPin != null && tempPin.isNotEmpty) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: Text(context.l10n.temporaryPinTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.temporaryPinMessage(memberName)),
+                const SizedBox(height: 16),
+                SelectableText(
+                  context.l10n.temporaryPinValue(tempPin),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n.temporaryPinDevHint,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(context.l10n.finish),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.memberActivationLogin),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
@@ -752,76 +942,272 @@ class _AddMemberSheetState extends ConsumerState<_AddMemberSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: DraggableScrollableSheet(
-        initialChildSize: 0.65,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: ListView(
-            controller: scroll,
-            padding: const EdgeInsets.all(24),
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(l10n.addMember, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 20),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _firstName,
-                      decoration: InputDecoration(labelText: l10n.firstName),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _lastName,
-                      decoration: InputDecoration(labelText: l10n.lastName),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _phone,
-                      decoration: InputDecoration(labelText: l10n.phoneNumber),
-                      keyboardType: TextInputType.phone,
-                      validator: (v) =>
-                          (v == null || v.trim().length < 9) ? l10n.fieldRequired : null,
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _submitting ? null : _submit,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.savings,
-                        minimumSize: const Size(double.infinity, 52),
-                      ),
-                      child: _submitting
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : Text(l10n.save),
-                    ),
-                    TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+        initialChildSize: 0.72,
+        minChildSize: 0.45,
+        maxChildSize: 0.92,
+        builder: (_, scroll) => ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.92),
+                    Colors.white.withValues(alpha: 0.88),
                   ],
                 ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border(
+                  top: BorderSide(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
+                ),
+              ),
+              child: ListView(
+                controller: scroll,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.savings.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.person_add_alt_1, color: AppColors.primary),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.addMember,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade900,
+                              ),
+                            ),
+                            Text(
+                              l10n.governanceStep1,
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        _GlassMemberField(
+                          controller: _firstName,
+                          focusNode: _firstNameFocus,
+                          label: l10n.firstName,
+                          icon: Icons.person_outline,
+                          textInputAction: TextInputAction.next,
+                          onSubmitted: (_) => _lastNameFocus.requestFocus(),
+                          validator: (v) =>
+                              (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
+                        ),
+                        const SizedBox(height: 12),
+                        _GlassMemberField(
+                          controller: _lastName,
+                          focusNode: _lastNameFocus,
+                          label: l10n.lastName,
+                          icon: Icons.badge_outlined,
+                          textInputAction: TextInputAction.next,
+                          onSubmitted: (_) => _phoneFocus.requestFocus(),
+                          validator: (v) =>
+                              (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
+                        ),
+                        const SizedBox(height: 12),
+                        _GlassMemberField(
+                          controller: _phone,
+                          focusNode: _phoneFocus,
+                          label: l10n.phoneNumber,
+                          hint: '0712 345 678',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submitting ? null : _submit(),
+                          validator: (v) =>
+                              (v == null || v.trim().length < 9) ? l10n.fieldRequired : null,
+                        ),
+                        const SizedBox(height: 24),
+                        _MembersPrimaryButton(
+                          label: l10n.save,
+                          loading: _submitting,
+                          onPressed: _submit,
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            l10n.cancel,
+                            style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassMemberField extends StatefulWidget {
+  const _GlassMemberField({
+    required this.controller,
+    required this.focusNode,
+    required this.label,
+    required this.validator,
+    this.icon,
+    this.hint,
+    this.keyboardType,
+    this.textInputAction,
+    this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final String label;
+  final String? hint;
+  final IconData? icon;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
+  final String? Function(String?)? validator;
+
+  @override
+  State<_GlassMemberField> createState() => _GlassMemberFieldState();
+}
+
+class _GlassMemberFieldState extends State<_GlassMemberField> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(() => setState(() {}));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final focused = widget.focusNode.hasFocus;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: focused ? AppColors.savings : Colors.grey.shade300,
+          width: focused ? 2 : 1,
+        ),
+        boxShadow: focused
+            ? [
+                BoxShadow(
+                  color: AppColors.savings.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: TextFormField(
+        controller: widget.controller,
+        focusNode: widget.focusNode,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        onFieldSubmitted: widget.onSubmitted,
+        validator: widget.validator,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey.shade900),
+        decoration: InputDecoration(
+          labelText: widget.label,
+          hintText: widget.hint,
+          prefixIcon: widget.icon != null
+              ? Icon(widget.icon, color: focused ? AppColors.savings : Colors.grey.shade600)
+              : null,
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+      ),
+    );
+  }
+}
+
+class _MembersPrimaryButton extends StatelessWidget {
+  const _MembersPrimaryButton({
+    required this.label,
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool loading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: loading ? null : onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
+          ),
+          child: Container(
+            alignment: Alignment.center,
+            height: 52,
+            child: loading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                  )
+                : Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ),
       ),

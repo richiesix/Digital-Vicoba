@@ -14,7 +14,6 @@ import '../widgets/fund_breakdown_bar.dart';
 import '../widgets/member_balance_ring.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/quick_action_tile.dart';
-import '../widgets/status_pill.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -117,117 +116,111 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   }
 
   List<Color> _headerGradient(AuthSession? session) {
-    if (session?.isSuperAdmin == true) {
+    if (session?.isProvisionalChair == true) {
+      return [const Color(0xFF33691E), const Color(0xFF558B2F)];
+    }
+    if (session?.isChairperson == true) {
       return [const Color(0xFF1B5E20), const Color(0xFF33691E)];
     }
     if (session?.isTreasurer == true) {
       return [const Color(0xFF2E7D32), const Color(0xFF43A047)];
     }
-    return [const Color(0xFF388E3C), const Color(0xFF66BB6A)];
+    if (session?.isSecretary == true) {
+      return [const Color(0xFF388E3C), const Color(0xFF66BB6A)];
+    }
+    return [const Color(0xFF43A047), const Color(0xFF81C784)];
   }
 
   IconData? _roleIcon(AuthSession? session) {
-    if (session?.isSuperAdmin == true) return Icons.admin_panel_settings;
+    if (session?.isProvisionalChair == true) return Icons.hourglass_top;
+    if (session?.isChairperson == true) return Icons.star;
     if (session?.isTreasurer == true) return Icons.account_balance;
+    if (session?.isSecretary == true) return Icons.edit_note;
     return Icons.person;
   }
 
   String _roleLabel(AuthSession? session, AppLocalizations l10n) {
-    if (session?.isSuperAdmin == true) return l10n.roleSuperAdmin;
+    if (session?.isProvisionalChair == true) return l10n.roleProvisionalChair;
+    if (session?.isChairperson == true) return l10n.roleChairperson;
     if (session?.isTreasurer == true) return l10n.roleTreasurer;
+    if (session?.isSecretary == true) return l10n.roleSecretary;
     return l10n.roleMember;
   }
 
   List<Widget> _buildRoleBody(AuthSession session, NumberFormat currency, AppLocalizations l10n) {
-    if (session.isSuperAdmin) return _superAdminBody(l10n, currency);
+    if (session.needsGovernanceSetup) return _interimChairBody(session, l10n);
     if (session.isTreasurer) return _treasurerBody(session, l10n, currency);
+    if (session.isChairperson || session.isSecretary) {
+      return [
+        if (session.canManageMembers) ...[
+          QuickActionTile(
+            icon: Icons.groups,
+            label: l10n.members,
+            color: AppColors.primary,
+            onTap: () => context.push(AppRoutes.members),
+          ),
+          const SizedBox(height: 12),
+        ],
+        ..._memberBody(session, l10n, currency),
+        if (session.hasPermission('group.manage_elections') ||
+            session.hasPermission('group.call_elections'))
+          QuickActionTile(
+            icon: Icons.how_to_vote,
+            label: l10n.governance,
+            color: AppColors.primary,
+            onTap: () => context.push(AppRoutes.governance),
+          ),
+        if (session.hasPermission('group.approve_loan'))
+          QuickActionTile(
+            icon: Icons.gavel,
+            label: l10n.approveLoan,
+            color: AppColors.pending,
+            onTap: () => context.push(AppRoutes.loanApprove),
+          ),
+      ];
+    }
     return _memberBody(session, l10n, currency);
   }
 
-  List<Widget> _superAdminBody(AppLocalizations l10n, NumberFormat currency) {
-    final fraud = _widgets?['fraud_alerts'] ?? 0;
-    final mmStatus = _widgets?['mobile_money_status'] as String? ?? 'operational';
-    final apiHealth = _widgets?['api_health'] as String? ?? 'healthy';
-
+  List<Widget> _interimChairBody(AuthSession session, AppLocalizations l10n) {
     return [
-      _sectionTitle(l10n.platformOverview, Icons.public),
-      const SizedBox(height: 12),
-      MetricCard(
-        title: l10n.nationalSavings,
-        value: currency.format(_widgets?['total_savings'] ?? 0),
-        icon: Icons.savings,
-        color: AppColors.savings,
-        onTap: () => context.push(AppRoutes.reports),
-      ),
-      const SizedBox(height: 12),
-      SizedBox(
-        height: 130,
-        child: Row(
-          children: [
-            Expanded(
-              child: MetricCard(
-                title: l10n.totalGroups,
-                value: '${_widgets?['total_groups'] ?? '—'}',
-                icon: Icons.groups,
-                color: AppColors.primary,
-                compact: true,
-                onTap: () => context.push(AppRoutes.groups),
+      Card(
+        color: const Color(0xFFE8F5E9),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.info_outline, color: AppColors.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.interimChairBanner,
+                  style: const TextStyle(fontSize: 14, height: 1.4),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: MetricCard(
-                title: l10n.totalMembers,
-                value: '${_widgets?['total_members'] ?? '—'}',
-                icon: Icons.people,
-                color: AppColors.savings,
-                compact: true,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: MetricCard(
-                title: l10n.activeLoans,
-                value: '${_widgets?['active_loans'] ?? '—'}',
-                icon: Icons.account_balance,
-                color: AppColors.pending,
-                compact: true,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       const SizedBox(height: 16),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            StatusPill(
-              icon: Icons.warning_amber,
-              label: l10n.fraudAlerts,
-              value: '$fraud',
-              color: fraud > 0 ? AppColors.overdue : AppColors.savings,
-              onTap: () => context.push(AppRoutes.reports),
-            ),
-            const SizedBox(width: 10),
-            StatusPill(
-              icon: Icons.phone_android,
-              label: l10n.mobileMoneyStatus,
-              value: mmStatus == 'operational' ? l10n.operational : mmStatus,
-              color: AppColors.savings,
-            ),
-            const SizedBox(width: 10),
-            StatusPill(
-              icon: Icons.cloud_done,
-              label: l10n.systemHealth,
-              value: apiHealth == 'healthy' ? l10n.healthy : apiHealth,
-              color: AppColors.primary,
-            ),
-          ],
+      _sectionTitle(l10n.setupGovernanceTitle, Icons.how_to_vote),
+      const SizedBox(height: 12),
+      if (session.hasPermission('group.manage_members') || session.isProvisionalChair)
+        QuickActionTile(
+          icon: Icons.person_add,
+          label: l10n.registerMember,
+          color: AppColors.savings,
+          onTap: () => context.push(AppRoutes.members),
         ),
-      ),
-      const SizedBox(height: 24),
-      ..._quickActionSection(session: null, l10n: l10n, isAdmin: true),
+      if (session.hasPermission('group.assign_leadership') ||
+          session.hasPermission('group.manage_elections'))
+        QuickActionTile(
+          icon: Icons.how_to_vote,
+          label: l10n.setupGovernance,
+          color: AppColors.primary,
+          onTap: () => context.push(AppRoutes.governance),
+        ),
     ];
   }
 
@@ -320,9 +313,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final alerts = _widgets?['notifications_unread'] ?? 0;
 
     return [
-      _sectionTitle(l10n.myWallet, Icons.wallet),
-      const SizedBox(height: 12),
       MemberBalanceRing(
+        title: l10n.myWallet,
+        titleIcon: Icons.account_balance_wallet_outlined,
         savingsLabel: l10n.mySavings,
         savingsValue: currency.format(savings),
         loanLabel: l10n.loanDebt,

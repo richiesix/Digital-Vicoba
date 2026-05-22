@@ -33,14 +33,15 @@ final class AuthController extends Controller
 
         return response()->json([
             'message' => 'Usajili umefanikiwa',
-            'user' => $user,
             'requires_pin_setup' => true,
+            ...$this->auth->buildMobileAuthResponse($user),
         ], 201);
     }
 
     public function sendOtp(OtpSendRequest $request): JsonResponse
     {
-        $this->auth->sendOtp($request->phone_number, $request->purpose);
+        $phone = \App\Support\PhoneNumber::normalize($request->phone_number);
+        $this->auth->sendOtp($phone, $request->purpose);
 
         return response()->json(['message' => 'OTP imetumwa']);
     }
@@ -94,7 +95,8 @@ final class AuthController extends Controller
     {
         $profile = app(\App\Services\RbacService::class)->buildAuthProfile(
             $request->user(),
-            $request->integer('group_id') ?: null
+            $request->integer('group_id') ?: null,
+            forMobile: true
         );
 
         return response()->json($profile);

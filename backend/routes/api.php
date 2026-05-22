@@ -5,12 +5,14 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ContributionController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\GovernanceController;
 use App\Http\Controllers\Api\V1\GroupController;
 use App\Http\Controllers\Api\V1\LoanController;
 use App\Http\Controllers\Api\V1\MeetingController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\MobileMoneyController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShareController;
 use App\Http\Controllers\Api\V1\ShareOutController;
@@ -33,11 +35,15 @@ Route::prefix('v1')->group(function (): void {
         Route::get('dashboard', [DashboardController::class, 'index']);
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
-        Route::post('auth/pin/setup', [AuthController::class, 'setupPin'])->middleware('permission:view_dashboard');
+        Route::post('auth/pin/setup', [AuthController::class, 'setupPin']);
+        Route::get('auth/profile/photo', [ProfileController::class, 'showPhoto']);
+        Route::post('auth/profile/photo', [ProfileController::class, 'uploadPhoto']);
+        Route::delete('auth/profile/photo', [ProfileController::class, 'removePhoto']);
         Route::post('auth/device/bind', [AuthController::class, 'bindDevice']);
 
         Route::get('groups', [GroupController::class, 'index'])->middleware('permission:view_dashboard');
-        Route::post('groups', [GroupController::class, 'store'])->middleware('permission:platform.manage_groups');
+        // Onboarding: new users have no roles until their first group is created.
+        Route::post('groups', [GroupController::class, 'store']);
 
         Route::middleware('group.access')->group(function (): void {
         Route::get('groups/{group}', [GroupController::class, 'show'])->middleware('permission:view_dashboard');
@@ -75,6 +81,33 @@ Route::prefix('v1')->group(function (): void {
         Route::get('groups/{group}/reports/{type}', [ReportController::class, 'generate'])->middleware('permission:group.generate_reports|platform.national_analytics');
         Route::get('groups/{group}/reports/{type}/download', [ReportController::class, 'download'])->middleware('permission:group.generate_reports|platform.national_analytics');
         Route::get('groups/{group}/analytics', [ReportController::class, 'analytics'])->middleware('permission:group.generate_reports|platform.national_analytics');
+
+        Route::get('groups/{group}/governance', [GovernanceController::class, 'leadershipDashboard'])
+            ->middleware('permission:member.participate_governance|group.manage_elections|group.assign_leadership');
+        Route::get('groups/{group}/elections', [GovernanceController::class, 'listElections'])
+            ->middleware('permission:member.participate_governance|group.manage_elections');
+        Route::post('groups/{group}/elections', [GovernanceController::class, 'createElection'])
+            ->middleware('permission:group.manage_elections|group.call_elections');
+        Route::get('elections/{election}', [GovernanceController::class, 'showElection'])
+            ->middleware('permission:member.participate_governance|group.manage_elections');
+        Route::post('elections/{election}/open', [GovernanceController::class, 'openElection'])
+            ->middleware('permission:group.manage_elections|group.call_elections');
+        Route::post('elections/{election}/nominate', [GovernanceController::class, 'nominate'])
+            ->middleware('permission:member.participate_governance|group.manage_elections');
+        Route::post('elections/{election}/vote', [GovernanceController::class, 'castVote'])
+            ->middleware('permission:member.participate_governance');
+        Route::get('elections/{election}/vote-status', [GovernanceController::class, 'voteStatus'])
+            ->middleware('permission:member.participate_governance');
+        Route::get('elections/{election}/results', [GovernanceController::class, 'results'])
+            ->middleware('permission:member.participate_governance|group.manage_elections');
+        Route::post('elections/{election}/close', [GovernanceController::class, 'closeElection'])
+            ->middleware('permission:group.manage_elections|group.call_elections');
+        Route::post('elections/{election}/sync-votes', [GovernanceController::class, 'syncVotes'])
+            ->middleware('permission:member.participate_governance');
+        Route::post('groups/{group}/leadership/assign', [GovernanceController::class, 'proposeAssignment'])
+            ->middleware('permission:group.assign_leadership|group.manage_elections');
+        Route::post('leadership-assignments/{assignment}/vote', [GovernanceController::class, 'approveAssignment'])
+            ->middleware('permission:member.participate_governance');
         });
 
         Route::get('notifications', [NotificationController::class, 'index'])->middleware('permission:member.view_notifications|view_dashboard');

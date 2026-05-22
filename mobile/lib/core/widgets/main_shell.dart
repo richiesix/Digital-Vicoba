@@ -37,7 +37,7 @@ class MainShell extends ConsumerWidget {
                       Icon(_roleIcon(session.primaryRole), color: Colors.white, size: 18),
                       const SizedBox(width: 8),
                       Text(
-                        _roleLabel(session.primaryRole, l10n),
+                        _roleLabel(session, l10n),
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -70,12 +70,11 @@ class MainShell extends ConsumerWidget {
       return [NavDestination(route: AppRoutes.home, iconAsset: NavIcons.home, label: l10n.home)];
     }
 
-    if (session.isSuperAdmin) {
+    if (!session.governanceComplete) {
       return [
-        NavDestination(route: AppRoutes.home, iconAsset: NavIcons.dashboard, label: l10n.dashboard),
-        NavDestination(route: AppRoutes.groups, iconAsset: NavIcons.groups, label: l10n.groups),
-        NavDestination(route: AppRoutes.reports, iconAsset: NavIcons.reports, label: l10n.analytics),
-        NavDestination(route: AppRoutes.notifications, iconAsset: NavIcons.notifications, label: l10n.notifications),
+        NavDestination(route: AppRoutes.home, iconAsset: NavIcons.home, label: l10n.home),
+        NavDestination(route: AppRoutes.members, iconAsset: NavIcons.profile, label: l10n.members),
+        NavDestination(route: AppRoutes.governance, iconAsset: NavIcons.meetings, label: l10n.governance),
         NavDestination(route: AppRoutes.profile, iconAsset: NavIcons.profile, label: l10n.profile),
       ];
     }
@@ -94,33 +93,52 @@ class MainShell extends ConsumerWidget {
 
     return [
       NavDestination(route: AppRoutes.home, iconAsset: NavIcons.home, label: l10n.home),
+      if (session.canManageMembers)
+        NavDestination(route: AppRoutes.members, iconAsset: NavIcons.groups, label: l10n.members),
       if (session.hasPermission('member.buy_shares'))
         NavDestination(route: AppRoutes.savings, iconAsset: NavIcons.savings, label: l10n.savings),
       if (session.hasPermission('member.apply_loan'))
         NavDestination(route: AppRoutes.loanApply, iconAsset: NavIcons.loans, label: l10n.loans),
       if (session.hasPermission('member.view_meetings'))
         NavDestination(route: AppRoutes.meetings, iconAsset: NavIcons.meetings, label: l10n.meetings),
+      if (session.hasPermission('member.participate_governance') ||
+          session.hasPermission('group.manage_elections') ||
+          session.hasPermission('group.call_elections'))
+        NavDestination(route: AppRoutes.governance, iconAsset: NavIcons.meetings, label: l10n.governance),
       NavDestination(route: AppRoutes.profile, iconAsset: NavIcons.profile, label: l10n.profile),
     ];
   }
 
   Color _roleColor(String role) => switch (role) {
-        'super_admin' => const Color(0xFF1B5E20),
+        'provisional_chair' => const Color(0xFF33691E),
+        'chairperson' => const Color(0xFF1B5E20),
         'treasurer' => const Color(0xFF2E7D32),
-        _ => const Color(0xFF388E3C),
+        'secretary' => const Color(0xFF388E3C),
+        _ => const Color(0xFF43A047),
       };
 
   IconData _roleIcon(String role) => switch (role) {
-        'super_admin' => Icons.admin_panel_settings,
+        'provisional_chair' => Icons.hourglass_top,
+        'chairperson' => Icons.star,
         'treasurer' => Icons.account_balance,
+        'secretary' => Icons.edit_note,
+        'money_counter' => Icons.payments,
+        'key_holder' => Icons.key,
         _ => Icons.person,
       };
 
-  String _roleLabel(String role, dynamic l10n) => switch (role) {
-        'super_admin' => l10n.roleSuperAdmin,
-        'treasurer' => l10n.roleTreasurer,
-        'chairperson' => l10n.roleChairperson,
-        'secretary' => l10n.roleSecretary,
-        _ => l10n.roleMember,
-      };
+  String _roleLabel(AuthSession session, dynamic l10n) {
+    if (!session.governanceComplete && (session.isProvisionalChair || session.isInterimChair)) {
+      return l10n.roleProvisionalChair;
+    }
+    return switch (session.primaryRole) {
+      'provisional_chair' => l10n.roleProvisionalChair,
+      'treasurer' => l10n.roleTreasurer,
+      'chairperson' => l10n.roleChairperson,
+      'secretary' => l10n.roleSecretary,
+      'money_counter' => l10n.roleMoneyCounter,
+      'key_holder' => l10n.roleKeyHolder,
+      _ => l10n.roleMember,
+    };
+  }
 }

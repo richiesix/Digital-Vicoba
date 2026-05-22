@@ -42,7 +42,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendOtp => 'Send OTP';
 
   @override
-  String get verifyOtp => 'Verify OTP';
+  String get verifyOtp => 'Verify code';
 
   @override
   String otpSentTo(String phone) {
@@ -54,7 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get demoAccounts =>
-      'Demo:\nAdmin: +255712000001\nTreasurer: +255712000002\nMember: +255712000003\nPIN: 1234 (all)';
+      'Demo:\nChairperson: +255712000001\nTreasurer: +255712000002\nMember: +255712000003\nPIN: 1234 (all)';
 
   @override
   String get dashboard => 'Dashboard';
@@ -279,10 +279,160 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleChairperson => 'Chairperson';
 
   @override
+  String get roleProvisionalChair => 'Temporary Chairperson';
+
+  @override
+  String get interimChairBanner =>
+      'You are the temporary chairperson until leadership is assigned. You can register members and set up governance only. Other group operations unlock after chairperson, secretary, and treasurer are in place.';
+
+  @override
+  String get setupGovernanceTitle => 'Get started';
+
+  @override
+  String get setupGovernance => 'Set up leadership';
+
+  @override
+  String get governanceLockedMessage =>
+      'Complete leadership setup first. Register members and assign chairperson, secretary, and treasurer.';
+
+  @override
   String get roleSecretary => 'Secretary';
 
   @override
   String get roleMember => 'Member';
+
+  @override
+  String get roleMoneyCounter => 'Money Counter';
+
+  @override
+  String get roleKeyHolder => 'Key Holder';
+
+  @override
+  String get governance => 'Governance';
+
+  @override
+  String get currentLeadership => 'Current Leadership';
+
+  @override
+  String get elections => 'Elections';
+
+  @override
+  String get createElection => 'Create Election';
+
+  @override
+  String get assignLeadership => 'Assign Leadership';
+
+  @override
+  String get registerMember => 'Register member';
+
+  @override
+  String get governanceSetupTitle => 'Group setup';
+
+  @override
+  String get governanceStep1 => 'Register other members (at least one more)';
+
+  @override
+  String get governanceStep2 =>
+      'Assign chairperson, secretary, treasurer & money counter';
+
+  @override
+  String get memberCountLabel => 'Group members';
+
+  @override
+  String memberCountValue(int count) {
+    return '$count active';
+  }
+
+  @override
+  String get membersNeededForLeadership =>
+      'Add at least one more member before assigning leadership';
+
+  @override
+  String get governancePermissionHint =>
+      'You need permission to manage members and assign leadership. If you created this group, log out and sign in again to refresh your role.';
+
+  @override
+  String get governanceReloginHint => 'Refresh session';
+
+  @override
+  String get assignLeadershipSetupHint =>
+      'During setup, roles are applied immediately. Assign chairperson, secretary, and treasurer to unlock full group features.';
+
+  @override
+  String get selectMember => 'Select member';
+
+  @override
+  String get assignRole => 'Assign role';
+
+  @override
+  String get leadershipAssigned => 'Leadership role assigned';
+
+  @override
+  String get viewAll => 'View all';
+
+  @override
+  String get noLeadershipYet =>
+      'No leadership elected yet. Run an election to assign roles.';
+
+  @override
+  String get noOpenElections => 'No open elections';
+
+  @override
+  String get noCandidatesYet => 'No candidates nominated yet';
+
+  @override
+  String get candidates => 'Candidates';
+
+  @override
+  String get electionResults => 'Election Results';
+
+  @override
+  String get openElection => 'Open Voting';
+
+  @override
+  String get closeElection => 'Close & Tally';
+
+  @override
+  String get votingScreen => 'Voting';
+
+  @override
+  String get voteRecorded => 'Your vote has been recorded';
+
+  @override
+  String get electionCreated => 'Election created';
+
+  @override
+  String get electionTitle => 'Election title';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get quorumPercent => 'Quorum';
+
+  @override
+  String get manualAssignmentHint =>
+      'Propose a leadership role. Members must approve to reach quorum.';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get memberId => 'Member ID';
+
+  @override
+  String get reason => 'Reason';
+
+  @override
+  String get submitForApproval => 'Submit for member approval';
+
+  @override
+  String get assignmentProposed =>
+      'Assignment proposed — awaiting member votes';
+
+  @override
+  String get platformAdminWebOnly =>
+      'Platform administration is only available on the Web Admin Panel. Use a VICOBA member account in this app.';
 
   @override
   String get dashboardAdmin => 'Dashboard — Admin';
@@ -434,9 +584,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recentActivity => 'Recent Activity';
-
-  @override
-  String get selectMember => 'Select member';
 
   @override
   String get shareQuantity => 'Number of shares';
@@ -670,6 +817,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memberAdded => 'Member added successfully';
 
   @override
+  String get memberActivationRegister =>
+      'Ask them to open the app → Register → use this same phone → OTP → set a 4-digit PIN. Then they can log in.';
+
+  @override
+  String get memberActivationLogin =>
+      'They already have an app account. They can log in with this phone number and their PIN.';
+
+  @override
+  String get temporaryPinTitle => 'Temporary PIN created';
+
+  @override
+  String temporaryPinMessage(String name) {
+    return 'Give this PIN to $name. They must log in with their phone number and this PIN, then choose a new PIN.';
+  }
+
+  @override
+  String temporaryPinValue(String pin) {
+    return 'Temporary PIN: $pin';
+  }
+
+  @override
+  String get temporaryPinDevHint =>
+      'In development, the temporary PIN is usually the last 4 digits of the phone number.';
+
+  @override
+  String get changePinRequiredTitle => 'Create your new PIN';
+
+  @override
+  String get changePinRequiredSubtitle =>
+      'You signed in with a temporary PIN. Choose a new 4-digit PIN to continue — you cannot skip this step.';
+
+  @override
+  String get pinCannotMatchTemporary =>
+      'Your new PIN must be different from the temporary PIN.';
+
+  @override
+  String get changeProfilePhoto => 'Change profile photo';
+
+  @override
+  String get uploadFromGallery => 'Choose from gallery';
+
+  @override
+  String get takePhoto => 'Take a photo';
+
+  @override
+  String get removeProfilePhoto => 'Remove photo';
+
+  @override
+  String get profilePhotoUpdated => 'Profile photo updated';
+
+  @override
+  String get profilePhotoRemoved => 'Profile photo removed';
+
+  @override
+  String get profilePhotoUploadFailed => 'Could not upload profile photo';
+
+  @override
+  String get cameraNotAvailableOnWeb =>
+      'Camera is not available in the browser. Please choose from gallery.';
+
+  @override
   String get filterAll => 'All';
 
   @override
@@ -858,10 +1066,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSubtitle => 'Sign in with your phone number and PIN';
 
   @override
-  String get tryDemoAccount => 'Try a demo account';
+  String get welcomeTitle => 'Welcome to Digital Vikoba';
 
   @override
-  String get demoPinLabel => 'Demo PIN: 1234';
+  String get welcomeSubtitle =>
+      'Register your group, save together, and manage loans transparently.';
+
+  @override
+  String get getStarted => 'Get started';
+
+  @override
+  String get alreadyHaveAccount => 'I already have an account';
+
+  @override
+  String get alreadyHaveAccountLogin => 'Already registered? Sign in';
+
+  @override
+  String get backToWelcome => 'Back';
+
+  @override
+  String get registerSubtitle =>
+      'Create your account with your phone number. We will send you a verification code.';
+
+  @override
+  String get registerChooseLanguageTitle => 'Choose your language';
+
+  @override
+  String get registerChooseLanguageSubtitle =>
+      'Pick your preferred language before registering. You can change it later in your profile.';
+
+  @override
+  String get registerContinue => 'Continue to registration';
+
+  @override
+  String get changeLanguage => 'Change language';
+
+  @override
+  String get invalidPhone =>
+      'Enter a valid Tanzania phone number (e.g. 0712345678)';
+
+  @override
+  String get pinMismatch => 'PINs do not match';
+
+  @override
+  String get pinMatches => 'PINs match';
+
+  @override
+  String get otpMustBe6 => 'Enter the 6-digit code';
+
+  @override
+  String get invalidOtp => 'Invalid or expired code';
+
+  @override
+  String get otpSendFailed => 'Could not send verification code';
+
+  @override
+  String get otpResent => 'Verification code sent again';
+
+  @override
+  String get resendOtp => 'Resend code';
+
+  @override
+  String resendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get otpEnterSubtitle =>
+      'Enter the 6-digit verification code sent to your phone';
+
+  @override
+  String get registrationExpired =>
+      'Registration session expired. Please start again.';
+
+  @override
+  String get pinSetupSubtitle =>
+      'Choose a 4-digit PIN. You will use it to sign in securely.';
+
+  @override
+  String get onboardingTitle => 'Set up your group';
+
+  @override
+  String get onboardingSubtitle =>
+      'You are not in a VICOBA group yet. Create one as the first member, or join with an invitation.';
+
+  @override
+  String get createYourGroup => 'Create your VICOBA group';
+
+  @override
+  String get createGroupHint =>
+      'As the first member, you can set up the group and invite others.';
+
+  @override
+  String get joinWithInvite => 'I have an invitation';
+
+  @override
+  String get inviteComingSoon =>
+      'Invitation links will be available soon. Ask your group secretary to add you by phone number.';
+
+  @override
+  String get connectionError =>
+      'Cannot reach the server. Ensure the backend is running.';
+
+  @override
+  String get devOtpHint => 'Development: verification code is 123456';
 
   @override
   String get notificationsSubtitle => 'Group and system alerts';
